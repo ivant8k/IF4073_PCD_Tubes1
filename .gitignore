@@ -1,0 +1,9 @@
+*.asv
+*.m~
+*.slxc
+*.mex*
+
+*.mlapp.bak
+
+.DS_Store
+Thumbs.db
