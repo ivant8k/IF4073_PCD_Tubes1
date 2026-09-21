@@ -3,7 +3,7 @@ function Hist = custom_hist(Image)
     
     Hist = zeros(C, 256);
     Img_double = double(Image);
-    n = M * N
+    n = M * N;
     
     for c = 1:C
         for i = 1:M
