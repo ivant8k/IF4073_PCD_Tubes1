@@ -31,7 +31,7 @@ function OutImage = intensity_transform(Image, TransformType, varargin)
             if nargin >= 3 && ~isempty(varargin{1}), ConstC = double(varargin{1}); end
 
             ImgDouble = double(Image) / 255.0;
-            Result = ((rexp(ImgDouble .^ ConstC) - 1) / (exp(1) - 1)) * 255.0;
+            Result = ((exp(ImgDouble .^ ConstC) - 1) / (exp(1) - 1)) * 255.0;
             OutImage = uint8(min(max(Result,0),255));
 
         case {'gamma', 'power'}
