@@ -1,22 +1,23 @@
 function ImageMatch = hist_matching(Image, RefInput)
 
     [M, N, C] = size(Image);
+    [M_ref, N_ref, ~] = size(RefInput);
     ImageMatch = zeros(M, N, C, 'uint8');
 
     HistSrc = custom_hist(Image);
     HistRef = custom_hist(RefInput);
 
     for c = 1:C
-        c_ref = min(c, size(HistRef, 1));
-        CDFSrc = cumsum(HistSrc(c, :));
+        c_ref = min(c, size(HistRef, 2));
+        CDFSrc = cumsum(HistSrc(:, c)) / (M * N);
         SrcEq = uint8(round(255 * CDFSrc));
 
-        CDFRef = cumsum(HistRef(c_ref, :));
+        CDFRef = cumsum(HistRef(:, c_ref)) / (M_ref * N_ref);
         RefEq = uint8(round(255 * CDFRef));
 
         % Perbedaan dengan pseudocode pak rin
         % Membatasi pemetaan balik CDF hanya pada rentang intensitas aktif referensi untuk mencegah artefak piksel akibat area CDF datar.
-        active_idx = find(HistRef(c_ref, :) > 0);
+        active_idx = find(HistRef(:, c_ref) > 0);
         min_ref = active_idx(1);
         max_ref = active_idx(end);
 

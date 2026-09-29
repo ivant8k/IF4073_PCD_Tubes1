@@ -4,7 +4,7 @@ function ImageEq = hist_equalization(Image)
 
     for c = 1:C
         ImgChannel = Image(:, :, c);
-        PDF = custom_hist(ImgChannel);
+        PDF = custom_hist(ImgChannel) / (M * N);
         CDF = zeros(1, 256);
         sum_val = 0.0;
         for i = 1:256

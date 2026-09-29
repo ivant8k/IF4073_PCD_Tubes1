@@ -233,14 +233,14 @@ txtOutputStats = uicontrol(f, 'Style', 'text', 'Position', [750, 30, 400, 20], .
     function plot_histogram(ax, img)
         if isempty(img), cla(ax); return; end
         hist_data = custom_hist(img);
-        [C, ~] = size(hist_data);
+        [~, C] = size(hist_data);
         cla(ax); hold(ax, 'on');
         if C == 1
-            plot(ax, 0:255, hist_data(1,:), 'k', 'LineWidth', 1.5);
+            plot(ax, 0:255, hist_data(:, 1), 'k', 'LineWidth', 1.5);
         elseif C == 3
-            plot(ax, 0:255, hist_data(1,:), 'r', 'LineWidth', 1.5);
-            plot(ax, 0:255, hist_data(2,:), 'g', 'LineWidth', 1.5);
-            plot(ax, 0:255, hist_data(3,:), 'b', 'LineWidth', 1.5);
+            plot(ax, 0:255, hist_data(:, 1), 'r', 'LineWidth', 1.5);
+            plot(ax, 0:255, hist_data(:, 2), 'g', 'LineWidth', 1.5);
+            plot(ax, 0:255, hist_data(:, 3), 'b', 'LineWidth', 1.5);
         end
         hold(ax, 'off');
         xlim(ax, [0 255]);
