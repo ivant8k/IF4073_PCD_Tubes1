@@ -44,7 +44,7 @@ function OutImage = image_filtering(Image, FilterType, varargin)
             Kernel = ones(KSize, KSize) / (KSize * KSize);
             Lowpass = apply_convolution(ImgDouble, Kernel);
             Highpass = ImgDouble - Lowpass;
-            OutDouble = (Alpha - 1.0) * ImgDouble + Highpass;
+            OutDouble = ImgDouble + Alpha * Highpass;
 
         case 'custom'
             if nargin < 3 || isempty(varargin{1})
