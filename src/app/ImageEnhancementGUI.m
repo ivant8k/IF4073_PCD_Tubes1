@@ -286,7 +286,7 @@ updateHint();
         [~, C] = size(hist_data);
         cla(ax); hold(ax, 'on');
         if C == 1
-            plot(ax, 0:255, hist_data(:, 1), 'k', 'LineWidth', 1.5);
+            plot(ax, 0:255, hist_data(:, 1), 'w', 'LineWidth', 1.5);
         elseif C == 3
             plot(ax, 0:255, hist_data(:, 1), 'r', 'LineWidth', 1.5);
             plot(ax, 0:255, hist_data(:, 2), 'g', 'LineWidth', 1.5);
