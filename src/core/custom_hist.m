@@ -1,17 +1,20 @@
 function Hist = custom_hist(Image)
-    [M, N, C] = size(Image);
+    [~, ~, C] = size(Image);
     
-    Hist = zeros(C, 256);
     Img_double = double(Image);
-    n = M * N;
-    
-    for c = 1:C
-        for i = 1:M
-            for j = 1:N
-                val = Img_double(i, j, c);
-                Hist(c, val + 1) = Hist(c, val + 1) + 1;
+
+    if C == 1
+        Hist = zeros(256, 1);
+        for val = Img_double(:)'
+            Hist(val + 1) = Hist(val + 1) + 1;
+        end
+    else
+        Hist = zeros(256, C);
+        for c = 1:C
+            channel_data = Img_double(:, :, c);
+            for val = channel_data(:)'
+                Hist(val + 1, c) = Hist(val + 1, c) + 1;
             end
         end
-        Hist(c, :) = Hist(c, :) / double(n);
     end
 end
