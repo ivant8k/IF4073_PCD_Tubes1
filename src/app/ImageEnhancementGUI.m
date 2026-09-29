@@ -10,6 +10,24 @@ addpath(fullfile(scriptDir, '..', 'enhancement'));
 % Data storage
 data = struct('inputImg', [], 'refImg', [], 'outputImg', [], 'workingImg', []);
 
+% Daftar metode Intensity Transformation:
+% {Nama di dropdown, TransformType, Petunjuk parameter}
+intensityMethods = {
+    'Negative',                        'negative',            'Tidak ada parameter.  s = 255 - r';
+    'Linear/Brightening',              'linear',              'a, b  (default 1, 0)   s = a*r + b';
+    'Log',                             'log',                 'c  (default 1)   s = c*log(1+r)';
+    'Inv Log',                         'inv_log',             'c  (default 1)   s = exp(r^c) - 1';
+    'Power (Gamma)',                   'gamma',               'gamma, c  (default 1, 1)   s = c*r^gamma.  gamma<1 terang, >1 gelap';
+    'Gamma Correction',                'gamma_correction',    'gamma, c  (default 2.2, 1)   s = c*r^(1/gamma)';
+    'Contrast Stretching (min-max)',   'contrast_stretching', 'rmin, rmax  (default: min & max citra)';
+    'Piecewise (r1,s1,r2,s2)',         'piecewise',           'r1, s1, r2, s2  (default 70,20,180,235).  r1=r2, s1=0, s2=255 -> thresholding';
+    'Piecewise (a,b,al,be,ga,ya,yb)',  'piecewise_abg',       'a, b, alpha, beta, gamma, ya, yb  (default 50,150,0.2,2,1,30,200)';
+    'Thresholding',                    'threshold',           'm  (default 128).  r<m -> 0, r>=m -> 255';
+    'Gray-level Slicing (Discard BG)', 'slicing_discard',     'A, B  (default 142,250).  Rentang [A,B] -> 255, lainnya -> 0';
+    'Gray-level Slicing (Preserve BG)','slicing_preserve',    'A, B  (default 142,250).  Rentang [A,B] -> 255, lainnya tetap';
+    'Bit-plane Slicing',               'bitplane',            'k = 0..7  (default 7).  0 = LSB, 7 = MSB'
+    };
+
 % Control Panel
 uicontrol(f, 'Style', 'text', 'Position', [20, 650, 200, 20], 'String', 'CONTROLS', ...
     'FontWeight', 'bold', 'HorizontalAlignment', 'left', 'FontSize', 12);
@@ -26,7 +44,7 @@ dropCategory = uicontrol(f, 'Style', 'popupmenu', 'Position', [20, 520, 220, 20]
 
 uicontrol(f, 'Style', 'text', 'Position', [20, 490, 220, 20], 'String', 'Specific Method:', 'HorizontalAlignment', 'left');
 dropMethod = uicontrol(f, 'Style', 'popupmenu', 'Position', [20, 470, 220, 20], ...
-    'String', {'Negative', 'Linear/Brightening', 'Log', 'Inv Log', 'Gamma', 'Contrast Stretching'});
+    'String', intensityMethods(:, 1)', 'Callback', @methodCallback);
 
 uicontrol(f, 'Style', 'text', 'Position', [20, 440, 220, 20], 'String', 'Parameters (comma-separated):', 'HorizontalAlignment', 'left');
 editParams = uicontrol(f, 'Style', 'edit', 'Position', [20, 420, 220, 20], 'HorizontalAlignment', 'left');
@@ -46,6 +64,11 @@ btnReset = uicontrol(f, 'Style', 'pushbutton', 'Position', [20, 288, 220, 32], .
 txtChainStatus = uicontrol(f, 'Style', 'text', 'Position', [20, 255, 220, 28], ...
     'String', 'Input: (none)', 'HorizontalAlignment', 'center', 'FontSize', 8, ...
     'ForegroundColor', [0.3 0.3 0.3]);
+
+% Petunjuk parameter (berubah sesuai metode terpilih)
+txtHint = uicontrol(f, 'Style', 'text', 'Position', [20, 190, 220, 60], ...
+    'String', '', 'HorizontalAlignment', 'left', 'FontSize', 8, ...
+    'ForegroundColor', [0.15 0.15 0.5]);
 
 % Input Panel
 axInputImg = axes(f, 'Units', 'pixels', 'Position', [300, 350, 400, 300]);
@@ -69,6 +92,8 @@ title(axOutputHist, 'Output Histogram');
 txtOutputStats = uicontrol(f, 'Style', 'text', 'Position', [750, 30, 400, 20], ...
     'String', 'Output Stats: N/A', 'HorizontalAlignment', 'center', 'FontWeight', 'bold');
 
+updateHint();
+
 % Callbacks
     function categoryCallback(~, ~)
         val = get(dropCategory, 'Value');
@@ -78,7 +103,7 @@ txtOutputStats = uicontrol(f, 'Style', 'text', 'Position', [750, 30, 400, 20], .
 
         switch val
             case 1
-                set(dropMethod, 'String', {'Negative', 'Linear/Brightening', 'Log', 'Inv Log', 'Gamma', 'Contrast Stretching'});
+                set(dropMethod, 'String', intensityMethods(:, 1)');
             case 2
                 set(dropMethod, 'String', {'None'});
                 set(dropMethod, 'Enable', 'off');
@@ -89,6 +114,29 @@ txtOutputStats = uicontrol(f, 'Style', 'text', 'Position', [750, 30, 400, 20], .
             case 4
                 set(dropMethod, 'String', {'Mean/Averaging', 'Gaussian', 'Laplacian/Sharpen', 'Unsharp', 'Highboost', 'Median', 'Min', 'Max'});
         end
+        updateHint();
+    end
+
+    function methodCallback(~, ~)
+        updateHint();
+    end
+
+    function updateHint()
+        catVal = get(dropCategory, 'Value');
+        switch catVal
+            case 1
+                idx = get(dropMethod, 'Value');
+                hintStr = ['Parameter: ' intensityMethods{idx, 3}];
+            case 2
+                hintStr = 'Tidak ada parameter.';
+            case 3
+                hintStr = 'Tidak ada parameter. Load reference image terlebih dahulu.';
+            case 4
+                hintStr = 'Parameter opsional, sesuai fungsi image_filtering.';
+            otherwise
+                hintStr = '';
+        end
+        set(txtHint, 'String', hintStr);
     end
 
     function loadInputCallback(~, ~)
@@ -157,26 +205,16 @@ txtOutputStats = uicontrol(f, 'Style', 'text', 'Position', [750, 30, 400, 20], .
         catVal = get(dropCategory, 'Value');
         methodStr = get(dropMethod, 'String');
         selMethod = methodStr{get(dropMethod, 'Value')};
-        params = str2num(get(editParams, 'String'));
 
         try
+            params = parse_params(get(editParams, 'String'));
+
             switch catVal
                 case 1 % Intensity Transformation
-                    switch selMethod
-                        case 'Negative',           tType = 'negative';
-                        case 'Linear/Brightening', tType = 'linear';
-                        case 'Log',                tType = 'log';
-                        case 'Inv Log',            tType = 'inv_log';
-                        case 'Gamma',              tType = 'gamma';
-                        case 'Contrast Stretching',tType = 'contrast_stretching';
-                    end
-                    if isempty(params)
-                        data.outputImg = intensity_transform(data.workingImg, tType);
-                    elseif length(params) == 1
-                        data.outputImg = intensity_transform(data.workingImg, tType, params(1));
-                    else
-                        data.outputImg = intensity_transform(data.workingImg, tType, params(1), params(2));
-                    end
+                    idx   = get(dropMethod, 'Value');
+                    tType = intensityMethods{idx, 2};
+                    args  = num2cell(params);   % semua parameter diteruskan (bisa > 2)
+                    data.outputImg = intensity_transform(data.workingImg, tType, args{:});
 
                 case 2 % Histogram Equalization
                     data.outputImg = hist_equalization(data.workingImg);
@@ -230,6 +268,18 @@ txtOutputStats = uicontrol(f, 'Style', 'text', 'Position', [750, 30, 400, 20], .
     end
 
 % Helpers
+    function p = parse_params(str)
+        % Ubah "a, b, c" (dipisah koma/spasi/titik koma) menjadi vektor angka
+        str = strtrim(str);
+        if isempty(str), p = []; return; end
+        tokens = strsplit(str, {',', ' ', ';'}, 'CollapseDelimiters', true);
+        tokens = tokens(~cellfun(@isempty, tokens));
+        p = str2double(tokens);
+        if any(isnan(p))
+            error('Parameter tidak valid. Gunakan angka yang dipisah koma, mis. 50,150,0.2');
+        end
+    end
+
     function plot_histogram(ax, img)
         if isempty(img), cla(ax); return; end
         hist_data = custom_hist(img);
