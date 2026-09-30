@@ -46,13 +46,6 @@ function OutImage = image_filtering(Image, FilterType, varargin)
             Highpass = ImgDouble - Lowpass;
             OutDouble = ImgDouble + Alpha * Highpass;
 
-        case 'custom'
-            if nargin < 3 || isempty(varargin{1})
-                error('A custom filter kernel must be provided.');
-            end
-            Kernel = double(varargin{1});
-            OutDouble = apply_convolution(ImgDouble, Kernel);
-
         case 'median'
             KSize = 3;
             if nargin >= 3 && ~isempty(varargin{1}), KSize = double(varargin{1}); end

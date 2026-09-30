@@ -19,13 +19,7 @@ intensityMethods = {
     'Inv Log',                         'inv_log',             'c  (default 1)   s = exp(r^c) - 1';
     'Power (Gamma)',                   'gamma',               'gamma, c  (default 1, 1)   s = c*r^gamma.  gamma<1 terang, >1 gelap';
     'Gamma Correction',                'gamma_correction',    'gamma, c  (default 2.2, 1)   s = c*r^(1/gamma)';
-    'Contrast Stretching (min-max)',   'contrast_stretching', 'rmin, rmax  (default: min & max citra)';
-    'Piecewise (r1,s1,r2,s2)',         'piecewise',           'r1, s1, r2, s2  (default 70,20,180,235).  r1=r2, s1=0, s2=255 -> thresholding';
-    'Piecewise (a,b,al,be,ga,ya,yb)',  'piecewise_abg',       'a, b, alpha, beta, gamma, ya, yb  (default 50,150,0.2,2,1,30,200)';
-    'Thresholding',                    'threshold',           'm  (default 128).  r<m -> 0, r>=m -> 255';
-    'Gray-level Slicing (Discard BG)', 'slicing_discard',     'A, B  (default 142,250).  Rentang [A,B] -> 255, lainnya -> 0';
-    'Gray-level Slicing (Preserve BG)','slicing_preserve',    'A, B  (default 142,250).  Rentang [A,B] -> 255, lainnya tetap';
-    'Bit-plane Slicing',               'bitplane',            'k = 0..7  (default 7).  0 = LSB, 7 = MSB'
+    'Contrast Stretching (min-max)',   'contrast_stretching', 'rmin, rmax  (default: min & max citra)'
     };
 
 % Control Panel
